@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import { postRouter } from './api/routes/posts.js';
 import { apiErrorHandler } from './api/middleware/error.js';
+import { categoriesRouter } from './api/routes/categories.js';
 const app = express();
 const port = 3001;
 
@@ -12,7 +13,10 @@ app.get('/health-check', (req, res) => {
 });
 
 app.use(express.json());
+
 app.use('/posts', postRouter);
+app.use('/categories', categoriesRouter);
+
 app.use(apiErrorHandler);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
