@@ -4,7 +4,12 @@ export const postRouter = express.Router();
 const postService = new PostService();
 
 postRouter.get('/', async (req, res, next) => {
-  const posts = await postService.getAll();
+  const posts = await postService.getPaginatedPosts(
+    req.query.page && parseInt(req.query.page),
+    req.query.pageSize && parseInt(req.query.pageSize),
+    req.query.search,
+    req.query.pageSize && JSON.parse(req.query.categories)
+  );
   return res.send(posts);
 });
 

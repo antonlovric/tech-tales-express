@@ -42,18 +42,6 @@ model post_tags {
   @@id([posts_id, tags_id])
 }
 
-model post_votes {
-  id         Int       @id @default(autoincrement())
-  user_id    Int
-  post_id    Int
-  type       String
-  created_at DateTime? @db.Timestamptz(6)
-  posts      posts     @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "voted_post_fk")
-  users      users     @relation(fields: [user_id], references: [id], onDelete: SetNull, map: "voted_user_fk")
-
-  @@unique([user_id, post_id], map: "user_post_vote_unique")
-}
-
 model posts {
   id              Int               @id @default(autoincrement())
   title           String?           @db.VarChar(100)
@@ -68,7 +56,7 @@ model posts {
   post_categories post_categories[]
   post_tags       post_tags[]
   post_votes      post_votes[]
-  users           users             @relation(fields: [users_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_posts_users")
+  author          users             @relation("posts_users_idTousers", fields: [users_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_posts_users")
   reactions       reactions[]
   saved_posts     saved_posts[]
 }
@@ -110,7 +98,19 @@ model users {
   bio           String?
   comments      comments[]
   post_votes    post_votes[]
-  posts         posts[]
+  posts         posts[]       @relation("posts_users_idTousers")
   reactions     reactions[]
   saved_posts   saved_posts[]
+}
+
+model post_votes {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  post_id    Int
+  type       String
+  created_at DateTime? @db.Timestamptz(6)
+  posts      posts     @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "voted_post_fk")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: SetNull, map: "voted_user_fk")
+
+  @@unique([user_id, post_id], map: "user_post_vote_unique")
 }
