@@ -13,6 +13,19 @@ postRouter.get('/:post_id', async (req, res, next) => {
   return res.send(post);
 });
 
+postRouter.get('/post-details/:post_id', async (req, res, next) => {
+  const post = await postService.getDetails(parseInt(req.params.post_id));
+  return res.send(post);
+});
+
+postRouter.get('/liked-status/:post_id/:user_id', async (req, res, next) => {
+  const post = await postService.getLikedStatus(
+    parseInt(req.params.post_id),
+    parseInt(req.params.user_id)
+  );
+  return res.send(post);
+});
+
 postRouter.post('/', async (req, res, next) => {
   const post = req.body.post;
   const createdPost = await postService.create(post);

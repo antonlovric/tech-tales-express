@@ -41,4 +41,41 @@ export class PostService {
       },
     });
   }
+  async getDetails(postId) {
+    return await prisma.posts.findFirst({
+      where: { id: { equals: parseInt(postId) } },
+      include: {
+        author: true,
+        post_categories: { include: { categories: true } },
+        post_votes: true,
+        comments: {
+          orderBy: { created_at: 'asc' },
+          include: {
+            users: {
+              select: { first_name: true, last_name: true, profile_image: true },
+            },
+          },
+        },
+      },
+    });
+  }
+  async getLikedStatus(postId, userId) {
+    const post = await prisma.post_votes.findFirst({
+      where: {
+        AND: [
+          {
+            post_id: {
+              equals: postId,
+            },
+          },
+          {
+            user_id: {
+              equals: userId,
+            },
+          },
+        ],
+      },
+    });
+    return post;
+  }
 }
