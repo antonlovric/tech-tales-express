@@ -3,6 +3,7 @@ import express from 'express';
 import { postRouter } from './api/routes/posts.js';
 import { apiErrorHandler } from './api/middleware/error.js';
 import { categoriesRouter } from './api/routes/categories.js';
+import { userRouter } from './api/routes/user.js';
 const app = express();
 const port = process.env.PORT;
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use('/posts', postRouter);
 app.use('/categories', categoriesRouter);
+app.use('/users', userRouter);
 
 app.use(apiErrorHandler);
 app.listen(port, () => {
