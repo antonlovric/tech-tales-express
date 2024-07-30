@@ -1,13 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
+import { postRouter } from './api/routes/posts.js';
 const app = express();
 const port = 3001;
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+app.get('/health-check', (req, res) => {
+  res.send('Health check response');
 });
+
+app.use('/posts', postRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
