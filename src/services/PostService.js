@@ -1,4 +1,6 @@
 import { prisma } from '../app.js';
+import { ApiError } from '../error/ApiError.js';
+import { AwsService } from './AwsService.js';
 
 export class PostService {
   async getAll() {
@@ -131,5 +133,13 @@ export class PostService {
       },
     });
     return post;
+  }
+  async uploadImage(image, contentType) {
+    const awsService = new AwsService();
+    const res = await awsService.uploadImage(image, contentType);
+    if (!res?.imageUrl) throw ApiError.badRequest('Image upload failed');
+    return {
+      imageUrl: res.imageUrl,
+    };
   }
 }

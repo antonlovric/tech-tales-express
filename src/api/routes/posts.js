@@ -1,5 +1,6 @@
 import express from 'express';
 import { PostService } from '../../services/PostService.js';
+import { upload } from './user.js';
 export const postRouter = express.Router();
 const postService = new PostService();
 
@@ -71,6 +72,15 @@ postRouter.put('/:post_id', async (req, res, next) => {
     const post = req.body.post;
     const updatedPost = await postService.update(parseInt(req.params.post_id, post));
     res.send(updatedPost);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.post('/image', upload.single('image'), async (req, res, next) => {
+  try {
+    const imageUrl = await postService.uploadImage(req.file.buffer, req.file.mimetype);
+    return res.send(imageUrl);
   } catch (error) {
     next(error);
   }
