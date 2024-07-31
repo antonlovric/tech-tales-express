@@ -1,6 +1,15 @@
 import express from 'express';
 import { UserService } from '../../services/UserService.js';
 import multer from 'multer';
+import { jwtVerify, SignJWT } from 'jose';
+import {
+  ACCESS_TOKEN_EXPIRATION_TIME,
+  getRefreshSecretKey,
+  getSecretKey,
+  HASH_ALG,
+  REFRESH_TOKEN_EXPIRATION_TIME,
+} from '../../helpers/auth.js';
+import { ApiError } from '../../error/ApiError.js';
 export const userRouter = express.Router();
 const userService = new UserService();
 
@@ -57,6 +66,54 @@ userRouter.post('/profile-image/:user_id', upload.single('image'), async (req, r
       req.file.mimetype
     );
     return res.send(profile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+userRouter.post('/sign-in', async (req, res, next) => {
+  try {
+    const authenticatedUser = await userService.authenticateUser(req.body.email, req.body.password);
+    req.session.regenerate(() => {
+      req.session.user = { ...authenticatedUser };
+    });
+    res.send({
+      accessToken: authenticatedUser.accessToken,
+      refreshToken: authenticatedUser.refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+userRouter.post('/refresh-token', async (req, res, next) => {
+  try {
+    const secretRefreshKey = getRefreshSecretKey();
+    const refreshToken = req.body.refreshToken;
+    if (!refreshToken) throw ApiError.badRequest('No refresh token provided!');
+    const token = await jwtVerify(refreshToken, secretRefreshKey);
+    if (!refreshToken) throw ApiError.authentication('Invalid refresh token!');
+    if (token.payload.jti) {
+      const accessToken = await new SignJWT({
+        jti: token.payload.jti,
+      })
+        .setProtectedHeader({ alg: HASH_ALG })
+        .setIssuedAt()
+        .setExpirationTime(ACCESS_TOKEN_EXPIRATION_TIME)
+        .sign(getSecretKey());
+
+      const refreshToken = await new SignJWT({
+        jti: token.payload.jti,
+      })
+        .setProtectedHeader({ alg: HASH_ALG })
+        .setIssuedAt()
+        .setExpirationTime(REFRESH_TOKEN_EXPIRATION_TIME)
+        .sign(getRefreshSecretKey());
+      res.send({
+        accessToken,
+        refreshToken,
+      });
+    } else throw ApiError.authentication;
   } catch (error) {
     next(error);
   }

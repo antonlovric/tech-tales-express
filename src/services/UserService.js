@@ -1,6 +1,15 @@
+import { verify } from 'argon2';
 import { prisma } from '../app.js';
 import { ApiError } from '../error/ApiError.js';
 import { AwsService } from './AwsService.js';
+import { SignJWT } from 'jose';
+import {
+  ACCESS_TOKEN_EXPIRATION_TIME,
+  getRefreshSecretKey,
+  getSecretKey,
+  HASH_ALG,
+  REFRESH_TOKEN_EXPIRATION_TIME,
+} from '../helpers/auth.js';
 
 export class UserService {
   async getAll() {
@@ -38,5 +47,36 @@ export class UserService {
         profile_image: res?.imageUrl,
       },
     });
+  }
+  async authenticateUser(email, password, session) {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: {
+          equals: email,
+        },
+      },
+    });
+
+    if (!user) throw ApiError.authentication('User not found!');
+
+    const isValidSignIn = await verify(user.password, password);
+
+    if (!isValidSignIn) throw ApiError.authentication('Invalid credentials!');
+
+    const accessToken = await new SignJWT({
+      jti: user.email,
+    })
+      .setProtectedHeader({ alg: HASH_ALG })
+      .setIssuedAt()
+      .setExpirationTime(ACCESS_TOKEN_EXPIRATION_TIME)
+      .sign(getSecretKey());
+    const refreshToken = await new SignJWT({
+      jti: user.email,
+    })
+      .setProtectedHeader({ alg: HASH_ALG })
+      .setIssuedAt()
+      .setExpirationTime(REFRESH_TOKEN_EXPIRATION_TIME)
+      .sign(getRefreshSecretKey());
+    return { accessToken, refreshToken, id: user.id };
   }
 }
