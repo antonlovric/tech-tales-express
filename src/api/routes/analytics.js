@@ -1,5 +1,5 @@
 import express from 'express';
-import { AnalyticsService } from '../../services/AnalyticsService';
+import { AnalyticsService } from '../../services/AnalyticsService.js';
 export const analyticsRouter = express.Router();
 const analyticsService = new AnalyticsService();
 

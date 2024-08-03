@@ -7,6 +7,7 @@ import { categoriesRouter } from './api/routes/categories.js';
 import { userRouter } from './api/routes/user.js';
 import { AnalyticsService } from './services/AnalyticsService.js';
 import session from 'express-session';
+import { analyticsRouter } from './api/routes/analytics.js';
 
 const app = express();
 app.use(express.json());
@@ -32,6 +33,7 @@ app.get('/health-check', (req, res) => {
 app.use('/posts', postRouter);
 app.use('/categories', categoriesRouter);
 app.use('/users', userRouter);
+app.use('/analytics', analyticsRouter);
 
 app.use(apiErrorHandler);
 app.listen(port, () => {
