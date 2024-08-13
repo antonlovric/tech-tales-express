@@ -5,7 +5,7 @@ const analyticsService = new AnalyticsService();
 
 analyticsRouter.get('/post-visit/:post_id', (req, res, next) => {
   try {
-    return analyticsService.incrementPostVisitCount(req.params.post_id);
+    res.send(analyticsService.incrementPostVisitCount(req.params.post_id));
   } catch (error) {
     next(error);
   }
@@ -13,7 +13,7 @@ analyticsRouter.get('/post-visit/:post_id', (req, res, next) => {
 
 analyticsRouter.get('/post-like/:post_id', (req, res, next) => {
   try {
-    return analyticsService.incrementPostLikeCount(req.params.post_id);
+    res.send(analyticsService.incrementPostLikeCount(req.params.post_id));
   } catch (error) {
     next(error);
   }
@@ -21,7 +21,7 @@ analyticsRouter.get('/post-like/:post_id', (req, res, next) => {
 
 analyticsRouter.get('/post-comment/:post_id', (req, res, next) => {
   try {
-    return analyticsService.incrementPostCommentCount(req.params.post_id);
+    res.send(analyticsService.incrementPostCommentCount(req.params.post_id));
   } catch (error) {
     next(error);
   }
@@ -29,16 +29,20 @@ analyticsRouter.get('/post-comment/:post_id', (req, res, next) => {
 
 analyticsRouter.get('/post-share/:post_id', (req, res, next) => {
   try {
-    return analyticsService.incrementPostShareCount(req.params.post_id);
+    res.send(analyticsService.incrementPostShareCount(req.params.post_id));
   } catch (error) {
     next(error);
   }
 });
 
-analyticsRouter.get('/relevant_post', (req, res, next) => {
+analyticsRouter.get('/relevant_post', async (req, res, next) => {
   try {
-    return analyticsService.getRelevantPostId();
+    const relevantPostId = await analyticsService.getRelevantPostId();
+    if (!relevantPostId) throw Error('No relevant post available');
+    const relevantPost = await analyticsService.getRelevantPost(relevantPostId);
+    res.send(relevantPost);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
