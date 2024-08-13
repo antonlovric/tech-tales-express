@@ -49,7 +49,7 @@ userRouter.get('/:user_id', async (req, res, next) => {
   }
 });
 
-userRouter.put('/:user_id', async (req, res, next) => {
+userRouter.patch('/:user_id', async (req, res, next) => {
   try {
     const profile = await userService.update(parseInt(req.params.user_id), req.body.user);
     return res.send(profile);
@@ -78,6 +78,7 @@ userRouter.post('/sign-in', async (req, res, next) => {
       req.session.user = { ...authenticatedUser };
     });
     res.send({
+      ...authenticatedUser,
       accessToken: authenticatedUser.accessToken,
       refreshToken: authenticatedUser.refreshToken,
     });

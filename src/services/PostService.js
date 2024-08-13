@@ -41,19 +41,22 @@ export class PostService {
       return pageSize * (page - 1);
     }
 
-    return await prisma.posts.findMany({
-      include: {
-        author: true,
-        post_categories: {
-          include: {
-            categories: true,
+    return {
+      posts: await prisma.posts.findMany({
+        include: {
+          author: true,
+          post_categories: {
+            include: {
+              categories: true,
+            },
           },
         },
-      },
-      where: whereClause,
-      take: pageSize,
-      skip: getSkipValue(),
-    });
+        where: whereClause,
+        take: pageSize,
+        skip: getSkipValue(),
+      }),
+      count: postCount,
+    };
   }
   async getPostCount(whereClause) {
     return await prisma.posts.count({
@@ -66,6 +69,18 @@ export class PostService {
         id: {
           equals: postId,
         },
+      },
+    });
+  }
+  async getEditDetails(postId) {
+    return await prisma.posts.findFirst({
+      where: {
+        id: {
+          equals: postId,
+        },
+      },
+      include: {
+        post_categories: true,
       },
     });
   }
@@ -134,6 +149,24 @@ export class PostService {
     });
     return post;
   }
+  async updateVote(vote, postId, userId) {
+    const post = await prisma.post_votes.upsert({
+      where: {
+        user_id_post_id: { post_id: postId, user_id: userId },
+      },
+      create: { type: vote, post_id: postId, user_id: userId },
+      update: { type: vote, post_id: postId, user_id: userId },
+    });
+    return post;
+  }
+  async remove(postId, userId) {
+    const post = await prisma.post_votes.delete({
+      where: {
+        user_id_post_id: { post_id: postId, user_id: userId },
+      },
+    });
+    return post;
+  }
   async uploadImage(image, contentType) {
     const awsService = new AwsService();
     const res = await awsService.uploadImage(image, contentType);
@@ -141,5 +174,30 @@ export class PostService {
     return {
       imageUrl: res.imageUrl,
     };
+  }
+  async postCategories() {
+    return await prisma.categories.findMany({
+      include: {
+        post_categories: {
+          include: {
+            posts: true,
+          },
+          orderBy: {
+            posts: {
+              created_at: { sort: 'desc' },
+            },
+          },
+        },
+      },
+    });
+  }
+  async addComment(comment, postId, userId) {
+    return await prisma.comments.create({
+      data: {
+        comment: comment,
+        posts_id: postId,
+        users_id: userId,
+      },
+    });
   }
 }

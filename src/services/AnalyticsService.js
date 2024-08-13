@@ -1,4 +1,5 @@
 import { redisClient } from '../lib/redis.js';
+import { prisma } from '../app.js';
 
 export const METRIC_WEIGHTS = {
   visits: 0.2,
@@ -54,5 +55,20 @@ export class AnalyticsService {
   async getRelevantPostId() {
     const relevancePostIds = await redisClient.zRangeByScore('post_relevance_scores', 0, 1);
     return parseInt(relevancePostIds?.[0]);
+  }
+  async getRelevantPost(id) {
+    return await prisma.posts.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        author: true,
+        post_categories: {
+          include: {
+            categories: true,
+          },
+        },
+      },
+    });
   }
 }

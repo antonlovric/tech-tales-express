@@ -20,5 +20,5 @@ export const HASH_ALG = 'HS256';
 
 export const EXPIRATION_TIME = 60 * 60 * 2;
 
-export const ACCESS_TOKEN_EXPIRATION_TIME = '2h';
+export const ACCESS_TOKEN_EXPIRATION_TIME = '1m';
 export const REFRESH_TOKEN_EXPIRATION_TIME = '7d';

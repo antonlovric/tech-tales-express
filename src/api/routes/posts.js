@@ -10,8 +10,17 @@ postRouter.get('/', async (req, res, next) => {
       req.query.page && parseInt(req.query.page),
       req.query.pageSize && parseInt(req.query.pageSize),
       req.query.search,
-      req.query.pageSize && JSON.parse(req.query.categories)
+      req.query.categories && JSON.parse(req.query.categories)
     );
+    return res.send(posts);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.get('/categories', async (req, res, next) => {
+  try {
+    const posts = await postService.postCategories();
     return res.send(posts);
   } catch (error) {
     next(error);
@@ -21,6 +30,15 @@ postRouter.get('/', async (req, res, next) => {
 postRouter.get('/:post_id', async (req, res, next) => {
   try {
     const post = await postService.get(parseInt(req.params.post_id));
+    return res.send(post);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.get('/edit-post-details/:post_id', async (req, res, next) => {
+  try {
+    const post = await postService.getEditDetails(parseInt(req.params.post_id));
     return res.send(post);
   } catch (error) {
     next(error);
@@ -48,11 +66,58 @@ postRouter.get('/liked-status/:post_id/:user_id', async (req, res, next) => {
   }
 });
 
+postRouter.post('/update-vote', async (req, res, next) => {
+  try {
+    const post = await postService.updateVote(
+      req.body.vote,
+      parseInt(req.body.post_id),
+      parseInt(req.body.user_id)
+    );
+    return res.send(post);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.delete('/remove-vote', async (req, res, next) => {
+  try {
+    const removedVote = await postService.remove(
+      parseInt(req.body.post_id),
+      parseInt(req.body.user_id)
+    );
+    return res.send(removedVote);
+  } catch (error) {
+    next(error);
+  }
+});
+
 postRouter.post('/', async (req, res, next) => {
   try {
     const post = req.body.post;
     const createdPost = await postService.create(post);
     res.send(createdPost);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.delete('/:post_id', async (req, res, next) => {
+  try {
+    const deletedPost = await postService.delete(req.params.post_id);
+    res.send(deletedPost);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postRouter.post('/add-comment', async (req, res, next) => {
+  try {
+    const addedComment = await postService.addComment(
+      req.body.comment,
+      req.body.post_id,
+      req.body.user_id
+    );
+    res.send(addedComment);
   } catch (error) {
     next(error);
   }
