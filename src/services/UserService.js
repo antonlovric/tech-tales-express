@@ -48,6 +48,9 @@ export class UserService {
       },
     });
   }
+  async createUser(user) {
+    return await prisma.users.create({ data: { ...user } });
+  }
   async authenticateUser(email, password) {
     const user = await prisma.users.findFirst({
       where: {

@@ -84,6 +84,15 @@ userRouter.post('/sign-in', async (req, res, next) => {
   }
 });
 
+userRouter.post('/sign-up', async (req, res, next) => {
+  try {
+    const user = await userService.createUser(req.body.user);
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
 userRouter.post('/refresh-token', async (req, res, next) => {
   try {
     const secretRefreshKey = getRefreshSecretKey();
