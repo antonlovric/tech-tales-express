@@ -33,74 +33,34 @@ model post_categories {
   @@index([posts_id], map: "fki_fk_post_categories_posts1")
 }
 
-model post_tags {
-  posts_id Int
-  tags_id  Int
-  posts    posts @relation(fields: [posts_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_post_tags_posts1")
-  tags     tags  @relation(fields: [tags_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_post_tags_tags1")
-
-  @@id([posts_id, tags_id])
-}
-
 model posts {
   id              Int               @id @default(autoincrement())
   title           String?           @db.VarChar(100)
   summary         String?
   users_id        Int
   html_content    String?
-  json_content    Json?             @db.Json
   cover_image     String?
   created_at      DateTime?         @default(now()) @db.Date
   edited_at       DateTime?         @default(now()) @db.Date
   comments        comments[]
   post_categories post_categories[]
-  post_tags       post_tags[]
   post_votes      post_votes[]
   author          users             @relation("posts_users_idTousers", fields: [users_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_posts_users")
-  reactions       reactions[]
-  saved_posts     saved_posts[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model reactions {
-  id       Int     @id @default(autoincrement())
-  type     String? @db.VarChar(45)
-  users_id Int
-  posts_id Int
-  posts    posts   @relation(fields: [posts_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reactions_posts1")
-  users    users   @relation(fields: [users_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reactions_users1")
-}
-
-model saved_posts {
-  posts_id Int
-  users_id Int
-  posts    posts @relation(fields: [posts_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_saved_posts_posts1")
-  users    users @relation(fields: [users_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_saved_posts_users1")
-
-  @@id([posts_id, users_id])
-}
-
-model tags {
-  id        Int         @id @default(autoincrement())
-  label     String?     @db.VarChar(45)
-  post_tags post_tags[]
 }
 
 model users {
-  id            Int           @id @default(autoincrement())
-  first_name    String?       @db.VarChar(45)
-  last_name     String?       @db.VarChar(45)
-  email         String        @db.VarChar(45)
-  password      String        @db.VarChar(256)
+  id            Int          @id @default(autoincrement())
+  first_name    String?      @db.VarChar(45)
+  last_name     String?      @db.VarChar(45)
+  email         String       @db.VarChar(45)
+  password      String       @db.VarChar(256)
   profile_image String?
   location      String?
   phone_number  String?
   bio           String?
   comments      comments[]
   post_votes    post_votes[]
-  posts         posts[]       @relation("posts_users_idTousers")
-  reactions     reactions[]
-  saved_posts   saved_posts[]
+  posts         posts[]      @relation("posts_users_idTousers")
 }
 
 model post_votes {
