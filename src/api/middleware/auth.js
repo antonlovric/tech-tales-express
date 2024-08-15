@@ -10,7 +10,6 @@ export const authenticateToken = async (req, res, next) => {
 
   try {
     const verified = await jwtVerify(token, getSecretKey());
-    req.session.user = verified;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });

@@ -48,7 +48,7 @@ export class UserService {
       },
     });
   }
-  async authenticateUser(email, password, session) {
+  async authenticateUser(email, password) {
     const user = await prisma.users.findFirst({
       where: {
         email: {

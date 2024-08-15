@@ -74,9 +74,6 @@ userRouter.post('/profile-image/:user_id', upload.single('image'), async (req, r
 userRouter.post('/sign-in', async (req, res, next) => {
   try {
     const authenticatedUser = await userService.authenticateUser(req.body.email, req.body.password);
-    req.session.regenerate(() => {
-      req.session.user = { ...authenticatedUser };
-    });
     res.send({
       ...authenticatedUser,
       accessToken: authenticatedUser.accessToken,
