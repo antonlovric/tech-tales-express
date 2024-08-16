@@ -101,16 +101,34 @@ export class PostService {
     });
   }
   async update(postId, post) {
-    return await prisma.posts.update({
-      where: {
-        id: {
-          equals: postId,
+    return await prisma.$transaction([
+      prisma.post_categories.deleteMany({
+        where: {
+          posts_id: postId,
         },
-      },
-      data: {
-        ...post,
-      },
-    });
+      }),
+      prisma.posts.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          id: postId,
+          html_content: post.html_content,
+          summary: post.summary,
+          title: post.title,
+          post_categories: {
+            create: post.categoryIds.map((categoryId) => ({
+              categories: {
+                connect: {
+                  id: categoryId,
+                },
+              },
+            })),
+          },
+          cover_image: post.coverImagePath,
+        },
+      }),
+    ]);
   }
   async getDetails(postId) {
     return await prisma.posts.findFirst({
