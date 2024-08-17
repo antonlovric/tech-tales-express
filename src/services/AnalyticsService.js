@@ -26,6 +26,7 @@ export class AnalyticsService {
     redisClient.incr(`post:${postId}:share`);
   }
   calculateRelevanceScore(metrics) {
+    console.log('CALCULATING RELEVANCE');
     const { visits, likes, comments, shares } = metrics;
     return (
       visits * METRIC_WEIGHTS.visits +
