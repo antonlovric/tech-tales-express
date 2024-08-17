@@ -194,7 +194,7 @@ export class PostService {
     };
   }
   async postCategories() {
-    return await prisma.categories.findMany({
+    const postCategories = await prisma.categories.findMany({
       include: {
         post_categories: {
           include: {
@@ -208,6 +208,15 @@ export class PostService {
         },
       },
     });
+    // get 5 posts per category
+    const POST_PER_CATEGORY_COUNT = 5;
+    const trimmedPostCategories = postCategories
+      .filter((category) => category.post_categories.length)
+      .map((category) => ({
+        ...category,
+        post_categories: category.post_categories.slice(0, POST_PER_CATEGORY_COUNT),
+      }));
+    return trimmedPostCategories;
   }
   async addComment(comment, postId, userId) {
     return await prisma.comments.create({
