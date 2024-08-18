@@ -20,7 +20,21 @@ export class UserService {
       where: { id: { equals: parseInt(userId || '') } },
       include: {
         posts: {
-          include: { post_categories: { include: { categories: true } } },
+          include: {
+            post_categories: {
+              include: {
+                categories: true,
+                posts: {
+                  select: {
+                    id: true,
+                    cover_image: true,
+                    summary: true,
+                    title: true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });

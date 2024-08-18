@@ -43,11 +43,27 @@ export class PostService {
 
     return {
       posts: await prisma.posts.findMany({
-        include: {
-          author: true,
+        select: {
+          id: true,
+          cover_image: true,
+          title: true,
+          summary: true,
+          created_at: true,
+          author: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+            },
+          },
           post_categories: {
-            include: {
-              categories: true,
+            select: {
+              categories: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
             },
           },
         },
@@ -194,28 +210,41 @@ export class PostService {
     };
   }
   async postCategories() {
+    const POST_PER_CATEGORY_COUNT = 5;
     const postCategories = await prisma.categories.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
         post_categories: {
-          include: {
-            posts: true,
+          select: {
+            posts: {
+              select: {
+                cover_image: true,
+                title: true,
+                summary: true,
+                id: true,
+              },
+            },
+            categories: {
+              select: {
+                id: true,
+              },
+            },
           },
+          take: POST_PER_CATEGORY_COUNT,
           orderBy: {
             posts: {
-              created_at: { sort: 'desc' },
+              created_at: {
+                sort: 'desc',
+              },
             },
           },
         },
       },
     });
-    // get 5 posts per category
-    const POST_PER_CATEGORY_COUNT = 5;
-    const trimmedPostCategories = postCategories
-      .filter((category) => category.post_categories.length)
-      .map((category) => ({
-        ...category,
-        post_categories: category.post_categories.slice(0, POST_PER_CATEGORY_COUNT),
-      }));
+    const trimmedPostCategories = postCategories.filter(
+      (category) => category.post_categories.length
+    );
     return trimmedPostCategories;
   }
   async addComment(comment, postId, userId) {
