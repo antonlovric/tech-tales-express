@@ -58,6 +58,15 @@ userRouter.patch('/:user_id', async (req, res, next) => {
   }
 });
 
+userRouter.post('/confirm/:user_id', async (req, res, next) => {
+  try {
+    const profile = await userService.confirmEmail(parseInt(req.params.user_id));
+    return res.send(profile);
+  } catch (error) {
+    next(error);
+  }
+});
+
 userRouter.post('/profile-image/:user_id', upload.single('image'), async (req, res, next) => {
   try {
     const profile = await userService.updateProfileImage(

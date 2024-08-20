@@ -18,20 +18,26 @@ export class UserService {
   async getProfile(userId) {
     return await prisma.users.findFirst({
       where: { id: { equals: parseInt(userId || '') } },
-      include: {
+      select: {
+        id: true,
+        bio: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        location: true,
+        phone_number: true,
+        profile_image: true,
         posts: {
-          include: {
+          select: {
+            id: true,
+            cover_image: true,
+            summary: true,
+            title: true,
             post_categories: {
-              include: {
+              select: {
                 categories: true,
-                posts: {
-                  select: {
-                    id: true,
-                    cover_image: true,
-                    summary: true,
-                    title: true,
-                  },
-                },
+                categories_id: true,
+                posts_id: true,
               },
             },
           },
@@ -76,6 +82,8 @@ export class UserService {
 
     if (!user) throw ApiError.authentication('User not found!');
 
+    if (!user.confirmed_at) throw ApiError.authorization('User not verified');
+
     const isValidSignIn = await verify(user.password, password);
 
     if (!isValidSignIn) throw ApiError.authentication('Invalid credentials!');
@@ -95,5 +103,15 @@ export class UserService {
       .setExpirationTime(REFRESH_TOKEN_EXPIRATION_TIME)
       .sign(getRefreshSecretKey());
     return { accessToken, refreshToken, id: user.id };
+  }
+  async confirmEmail(userId) {
+    return await prisma.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        confirmed_at: new Date(),
+      },
+    });
   }
 }

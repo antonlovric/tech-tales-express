@@ -13,10 +13,10 @@ export class ApiError {
   }
 
   static authorization(message) {
-    return new ApiError(401, message);
+    return new ApiError(403, message);
   }
 
   static authentication(message) {
-    return new ApiError(403, message);
+    return new ApiError(401, message);
   }
 }

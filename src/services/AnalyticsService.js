@@ -60,13 +60,36 @@ export class AnalyticsService {
   async getRelevantPost(id) {
     return await prisma.posts.findFirst({
       where: {
-        id,
+        id: {
+          equals: id,
+        },
       },
-      include: {
-        author: true,
+      select: {
+        id: true,
+        cover_image: true,
+        title: true,
+        summary: true,
+        created_at: true,
+        author: {
+          select: {
+            first_name: true,
+            last_name: true,
+            id: true,
+            profile_image: true,
+          },
+        },
         post_categories: {
-          include: {
+          select: {
             categories: true,
+            posts: {
+              select: {
+                cover_image: true,
+                created_at: true,
+                id: true,
+                summary: true,
+                title: true,
+              },
+            },
           },
         },
       },
