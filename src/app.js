@@ -30,4 +30,4 @@ app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
 
-cron.schedule('0 0 * * *', analyticsService.calculateRelevanceScore);
+cron.schedule('0 0 * * *', analyticsService.updateRelevanceScores);
