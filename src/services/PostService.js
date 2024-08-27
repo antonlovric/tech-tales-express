@@ -132,16 +132,8 @@ export class PostService {
           html_content: post.html_content,
           summary: post.summary,
           title: post.title,
-          post_categories: {
-            create: post.categoryIds.map((categoryId) => ({
-              categories: {
-                connect: {
-                  id: categoryId,
-                },
-              },
-            })),
-          },
-          cover_image: post.coverImagePath,
+          post_categories: post.post_categories,
+          cover_image: post.cover_image,
         },
       }),
     ]);
