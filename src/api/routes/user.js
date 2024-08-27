@@ -10,6 +10,7 @@ import {
   REFRESH_TOKEN_EXPIRATION_TIME,
 } from '../../helpers/auth.js';
 import { ApiError } from '../../error/ApiError.js';
+import { authenticateToken } from '../middleware/auth.js';
 export const userRouter = express.Router();
 const userService = new UserService();
 
@@ -49,7 +50,7 @@ userRouter.get('/:user_id', async (req, res, next) => {
   }
 });
 
-userRouter.patch('/:user_id', async (req, res, next) => {
+userRouter.patch('/:user_id', authenticateToken, async (req, res, next) => {
   try {
     const profile = await userService.update(parseInt(req.params.user_id), req.body.user);
     return res.send(profile);
@@ -67,18 +68,23 @@ userRouter.post('/confirm/:user_id', async (req, res, next) => {
   }
 });
 
-userRouter.post('/profile-image/:user_id', upload.single('image'), async (req, res, next) => {
-  try {
-    const profile = await userService.updateProfileImage(
-      parseInt(req.params.user_id),
-      req.file.buffer,
-      req.file.mimetype
-    );
-    return res.send(profile);
-  } catch (error) {
-    next(error);
+userRouter.post(
+  '/profile-image/:user_id',
+  authenticateToken,
+  upload.single('image'),
+  async (req, res, next) => {
+    try {
+      const profile = await userService.updateProfileImage(
+        parseInt(req.params.user_id),
+        req.file.buffer,
+        req.file.mimetype
+      );
+      return res.send(profile);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 userRouter.post('/sign-in', async (req, res, next) => {
   try {
